@@ -1,59 +1,82 @@
-import java.io.File;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class GestorDeArchivos {
     private static final Scanner sc = new Scanner(System.in);
+    private ArrayList<Archivo> archivos = new ArrayList<>();  // Lista para almacenar los archivos
 
+    // Método para crear un archivo con contenido
     public void crearArchivo() {
-        System.out.print("Escribe la ruta del directorio: ");
-        String rutaDirectorio = sc.nextLine();
-        File directorio = new File(rutaDirectorio);
+        String rutaArchivo = "";
+        boolean rutaValida = false;
 
-        if (!directorio.exists() && !directorio.mkdirs()) {
-            System.out.println("No se pudo crear el directorio.");
-            return;
+        // Validación de la ruta del archivo (solo simulada)
+        while (!rutaValida) {
+            System.out.print("Escribe la ruta del archivo (ejemplo: C:\\Usuarios\\TuUsuario\\Documents\\): ");
+            rutaArchivo = sc.nextLine();
+
+            // Simulamos que la ruta siempre es válida
+            System.out.println("Ruta aceptada: " + rutaArchivo);
+            rutaValida = true;  // No verificamos realmente la existencia de la ruta en el sistema de archivos
         }
 
         System.out.print("Nombre del archivo (sin extensión): ");
         String nombreArchivo = sc.nextLine();
 
-        System.out.print("Formato de archivo (txt, docx, csv): ");
-        String extensionArchivo = sc.nextLine();
-        
-        if (!extensionArchivo.startsWith(".")) {
-            extensionArchivo = "." + extensionArchivo;
+        String extensionArchivo = "";
+        boolean tipoValido = false;
+
+        // Validación del tipo de archivo
+        while (!tipoValido) {
+            System.out.print("Formato de archivo (txt, docx, csv): ");
+            extensionArchivo = sc.nextLine();
+
+            if (extensionArchivo.equalsIgnoreCase("txt") || extensionArchivo.equalsIgnoreCase("docx") || extensionArchivo.equalsIgnoreCase("csv")) {
+                tipoValido = true;
+            } else {
+                System.out.println("Formato de archivo no válido. Por favor, elige entre txt, docx, o csv.");
+            }
         }
 
-        File archivo = new File(directorio, nombreArchivo + extensionArchivo);
-        
-        try (java.io.PrintWriter writer = new java.io.PrintWriter(archivo)) {
-            System.out.println("Ingresa el contenido del archivo (escribe 'finclose' para terminar):");
-            String linea;
-            while (!(linea = sc.nextLine()).equalsIgnoreCase("finclose")) {
-                writer.println(linea);
-            }
-            System.out.println("Archivo guardado en: " + archivo.getAbsolutePath());
-        } catch (Exception e) {
-            System.out.println("Error al crear el archivo: " + e.getMessage());
+        Archivo nuevoArchivo = new Archivo(rutaArchivo + nombreArchivo + "." + extensionArchivo);  // Crear archivo con ruta y nombre completo
+
+        System.out.println("Ingresa el contenido del archivo (escribe 'finclose' para terminar):");
+        String linea;
+        while (!(linea = sc.nextLine()).equalsIgnoreCase("finclose")) {
+            nuevoArchivo.agregarContenido(linea);
         }
+
+        archivos.add(nuevoArchivo);
+
+        System.out.println("Archivo " + nuevoArchivo.getNombre() + " guardado correctamente (simulado) en: " + nuevoArchivo.getRuta());
     }
 
-    public void leerArchivo() {
-        System.out.print("Escribe la ruta completa del archivo: ");
-        File archivo = new File(sc.nextLine());
-
-        if (!archivo.exists() || !archivo.isFile()) {
-            System.out.println("El archivo no existe o la ruta es incorrecta.");
+    // Método para ver los archivos disponibles
+    public void verArchivosDisponibles() {
+        if (archivos.isEmpty()) {
+            System.out.println("No hay archivos disponibles.");
             return;
         }
 
-        try (Scanner fileScanner = new Scanner(archivo)) {
-            System.out.println("Contenido del archivo:");
-            while (fileScanner.hasNextLine()) {
-                System.out.println(fileScanner.nextLine());
-            }
-        } catch (Exception e) {
-            System.out.println("Error al leer el archivo: " + e.getMessage());
+        System.out.println("Archivos disponibles:");
+        for (int i = 0; i < archivos.size(); i++) {
+            System.out.println((i + 1) + ". " + archivos.get(i).getNombre());
         }
+    }
+
+    // Método para leer el contenido de un archivo
+    public void leerArchivo() {
+        verArchivosDisponibles();
+        System.out.print("Escribe el número del archivo que deseas ver: ");
+        int opcion = sc.nextInt();
+        sc.nextLine();  // Limpiar el buffer
+
+        if (opcion < 1 || opcion > archivos.size()) {
+            System.out.println("Opción no válida.");
+            return;
+        }
+
+        Archivo archivoSeleccionado = archivos.get(opcion - 1);
+        archivoSeleccionado.mostrarContenido();
     }
 }
